@@ -1,0 +1,20 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "../../Git/MedicalFunction_rep"
+		},
+		{
+			"path": "../../Git/MedicalStoredProcedure_rep"
+		},
+		{
+			"path": "../../Git/Medicaltable_rep"
+		},
+		{
+			"path": "../../Git/MedicalView_rep"
+		}
+	],
+	"settings": {}
+}

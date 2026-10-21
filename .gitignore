@@ -1,0 +1,7 @@
+secrets/
+tools/settings.json
+output/
+*.pyc
+__pycache__/
+build/
+dist/

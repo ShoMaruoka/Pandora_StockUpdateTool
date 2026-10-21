@@ -1,0 +1,930 @@
+{
+  "version": "0.4",
+  "validation_errors": [],
+  "validation_warnings": [
+    "卸在庫使用予定シート: 20260421"
+  ],
+  "precheck": {
+    "sheet": "20260421",
+    "master_count": 12661,
+    "summary": {
+      "total": 3399,
+      "ok": 3012,
+      "changed": 1422,
+      "statuses": {
+        "OK": 3012,
+        "7桁数字＝見積りコード": 76,
+        "WebCD未一致": 252,
+        "未定義SKU形式": 22,
+        "itemsubなし・WebCD未一致": 37
+      },
+      "channels": {
+        "Mercari": 1132,
+        "Amazon": 1709,
+        "itemRobot-selection": 236,
+        "itemRobot-item": 322
+      }
+    },
+    "analysis": {
+      "change_by_channel": {
+        "Mercari": 931,
+        "Amazon": 168,
+        "itemRobot-selection": 145,
+        "itemRobot-item": 178
+      },
+      "severe_drop_count": 101,
+      "status_by_channel": {
+        "Mercari": {
+          "OK": 993,
+          "7桁数字＝見積りコード": 64,
+          "WebCD未一致": 53,
+          "未定義SKU形式": 22
+        },
+        "Amazon": {
+          "7桁数字＝見積りコード": 12,
+          "OK": 1519,
+          "WebCD未一致": 178
+        },
+        "itemRobot-selection": {
+          "OK": 233,
+          "WebCD未一致": 3
+        },
+        "itemRobot-item": {
+          "itemsubなし・WebCD未一致": 37,
+          "OK": 267,
+          "WebCD未一致": 18
+        }
+      }
+    }
+  },
+  "outputs": {
+    "wholesale_sheet": "20260421",
+    "warnings": [],
+    "ir_item": "/mnt/data/ec_inventory_app_v04_build/ec_inventory_app_v03/test_output/EC在庫更新_20260821_070035/ir-item_在庫更新_20260821.csv",
+    "ir_selection": "/mnt/data/ec_inventory_app_v04_build/ec_inventory_app_v03/test_output/EC在庫更新_20260821_070035/ir-selection_在庫更新_20260821.csv",
+    "amazon_xlsm": "/mnt/data/ec_inventory_app_v04_build/ec_inventory_app_v03/test_output/EC在庫更新_20260821_070035/Amazon_PriceAndQuantity_20260821.xlsm",
+    "amazon_txt": "/mnt/data/ec_inventory_app_v04_build/ec_inventory_app_v03/test_output/EC在庫更新_20260821_070035/Amazon在庫更新_20260821.txt",
+    "mercari": "/mnt/data/ec_inventory_app_v04_build/ec_inventory_app_v03/test_output/EC在庫更新_20260821_070035/メルカリ在庫更新_20260821.csv",
+    "audit": "/mnt/data/ec_inventory_app_v04_build/ec_inventory_app_v03/test_output/EC在庫更新_20260821_070035/在庫更新監査_20260821.csv",
+    "summary": {
+      "total": 3399,
+      "ok": 3012,
+      "changed": 1422,
+      "statuses": {
+        "OK": 3012,
+        "WebCD未一致": 252,
+        "itemsubなし・WebCD未一致": 37,
+        "7桁数字＝見積りコード": 76,
+        "未定義SKU形式": 22
+      },
+      "channels": {
+        "itemRobot-selection": 236,
+        "itemRobot-item": 322,
+        "Amazon": 1709,
+        "Mercari": 1132
+      }
+    },
+    "analysis": {
+      "status_by_channel": {
+        "itemRobot-selection": {
+          "OK": 233,
+          "WebCD未一致": 3
+        },
+        "itemRobot-item": {
+          "itemsubなし・WebCD未一致": 37,
+          "OK": 267,
+          "WebCD未一致": 18
+        },
+        "Amazon": {
+          "7桁数字＝見積りコード": 12,
+          "OK": 1519,
+          "WebCD未一致": 178
+        },
+        "Mercari": {
+          "OK": 993,
+          "7桁数字＝見積りコード": 64,
+          "WebCD未一致": 53,
+          "未定義SKU形式": 22
+        }
+      },
+      "change_by_channel": {
+        "itemRobot-selection": 145,
+        "itemRobot-item": 178,
+        "Amazon": 168,
+        "Mercari": 931
+      },
+      "severe_drops": [
+        {
+          "channel": "itemRobot-selection",
+          "sku": "282976",
+          "webcd": "282976",
+          "old_stock": 1,
+          "new_stock": 0,
+          "drop_pct": 100.0
+        },
+        {
+          "channel": "itemRobot-selection",
+          "sku": "314989",
+          "webcd": "314989",
+          "old_stock": 5,
+          "new_stock": 0,
+          "drop_pct": 100.0
+        },
+        {
+          "channel": "itemRobot-selection",
+          "sku": "351733",
+          "webcd": "351733",
+          "old_stock": 8,
+          "new_stock": 0,
+          "drop_pct": 100.0
+        },
+        {
+          "channel": "itemRobot-selection",
+          "sku": "336661",
+          "webcd": "336661",
+          "old_stock": 6,
+          "new_stock": 0,
+          "drop_pct": 100.0
+        },
+        {
+          "channel": "itemRobot-selection",
+          "sku": "336660",
+          "webcd": "336660",
+          "old_stock": 6,
+          "new_stock": 0,
+          "drop_pct": 100.0
+        },
+        {
+          "channel": "itemRobot-selection",
+          "sku": "327032",
+          "webcd": "327032",
+          "old_stock": 2,
+          "new_stock": 0,
+          "drop_pct": 100.0
+        },
+        {
+          "channel": "itemRobot-selection",
+          "sku": "412824",
+          "webcd": "412824",
+          "old_stock": 7,
+          "new_stock": 0,
+          "drop_pct": 100.0
+        },
+        {
+          "channel": "itemRobot-selection",
+          "sku": "493407",
+          "webcd": "493407",
+          "old_stock": 8,
+          "new_stock": 1,
+          "drop_pct": 87.5
+        },
+        {
+          "channel": "itemRobot-selection",
+          "sku": "412825",
+          "webcd": "412825",
+          "old_stock": 14,
+          "new_stock": 1,
+          "drop_pct": 92.9
+        },
+        {
+          "channel": "itemRobot-selection",
+          "sku": "360375",
+          "webcd": "360375",
+          "old_stock": 6,
+          "new_stock": 1,
+          "drop_pct": 83.3
+        },
+        {
+          "channel": "itemRobot-selection",
+          "sku": "507011",
+          "webcd": "507011",
+          "old_stock": 3,
+          "new_stock": 0,
+          "drop_pct": 100.0
+        },
+        {
+          "channel": "itemRobot-selection",
+          "sku": "515171",
+          "webcd": "515171",
+          "old_stock": 14,
+          "new_stock": 2,
+          "drop_pct": 85.7
+        },
+        {
+          "channel": "itemRobot-item",
+          "sku": "344457",
+          "webcd": "344457",
+          "old_stock": 100,
+          "new_stock": 3,
+          "drop_pct": 97.0
+        },
+        {
+          "channel": "itemRobot-item",
+          "sku": "508376",
+          "webcd": "508376",
+          "old_stock": 11,
+          "new_stock": 0,
+          "drop_pct": 100.0
+        },
+        {
+          "channel": "Amazon",
+          "sku": "223517x72",
+          "webcd": "223517",
+          "old_stock": 1,
+          "new_stock": 0,
+          "drop_pct": 100.0
+        },
+        {
+          "channel": "Amazon",
+          "sku": "223521x72",
+          "webcd": "223521",
+          "old_stock": 1,
+          "new_stock": 0,
+          "drop_pct": 100.0
+        },
+        {
+          "channel": "Amazon",
+          "sku": "223522x72",
+          "webcd": "223522",
+          "old_stock": 1,
+          "new_stock": 0,
+          "drop_pct": 100.0
+        },
+        {
+          "channel": "Amazon",
+          "sku": "234196x8",
+          "webcd": "234196",
+          "old_stock": 10,
+          "new_stock": 0,
+          "drop_pct": 100.0
+        },
+        {
+          "channel": "Amazon",
+          "sku": "241683",
+          "webcd": "241683",
+          "old_stock": 2,
+          "new_stock": 0,
+          "drop_pct": 100.0
+        },
+        {
+          "channel": "Amazon",
+          "sku": "256437",
+          "webcd": "256437",
+          "old_stock": 10,
+          "new_stock": 2,
+          "drop_pct": 80.0
+        },
+        {
+          "channel": "Amazon",
+          "sku": "274672",
+          "webcd": "274672",
+          "old_stock": 6,
+          "new_stock": 0,
+          "drop_pct": 100.0
+        },
+        {
+          "channel": "Amazon",
+          "sku": "282976",
+          "webcd": "282976",
+          "old_stock": 3,
+          "new_stock": 0,
+          "drop_pct": 100.0
+        },
+        {
+          "channel": "Amazon",
+          "sku": "285630",
+          "webcd": "285630",
+          "old_stock": 4,
+          "new_stock": 0,
+          "drop_pct": 100.0
+        },
+        {
+          "channel": "Amazon",
+          "sku": "302087",
+          "webcd": "302087",
+          "old_stock": 12,
+          "new_stock": 0,
+          "drop_pct": 100.0
+        },
+        {
+          "channel": "Amazon",
+          "sku": "316031x72",
+          "webcd": "316031",
+          "old_stock": 1,
+          "new_stock": 0,
+          "drop_pct": 100.0
+        },
+        {
+          "channel": "Amazon",
+          "sku": "316032x72",
+          "webcd": "316032",
+          "old_stock": 1,
+          "new_stock": 0,
+          "drop_pct": 100.0
+        },
+        {
+          "channel": "Amazon",
+          "sku": "316038x72",
+          "webcd": "316038",
+          "old_stock": 1,
+          "new_stock": 0,
+          "drop_pct": 100.0
+        },
+        {
+          "channel": "Amazon",
+          "sku": "336660",
+          "webcd": "336660",
+          "old_stock": 3,
+          "new_stock": 0,
+          "drop_pct": 100.0
+        },
+        {
+          "channel": "Amazon",
+          "sku": "336661",
+          "webcd": "336661",
+          "old_stock": 6,
+          "new_stock": 0,
+          "drop_pct": 100.0
+        },
+        {
+          "channel": "Amazon",
+          "sku": "400833",
+          "webcd": "400833",
+          "old_stock": 9,
+          "new_stock": 0,
+          "drop_pct": 100.0
+        },
+        {
+          "channel": "Amazon",
+          "sku": "407649",
+          "webcd": "407649",
+          "old_stock": 50,
+          "new_stock": 0,
+          "drop_pct": 100.0
+        },
+        {
+          "channel": "Amazon",
+          "sku": "409103x72",
+          "webcd": "409103",
+          "old_stock": 1,
+          "new_stock": 0,
+          "drop_pct": 100.0
+        },
+        {
+          "channel": "Amazon",
+          "sku": "409105x72",
+          "webcd": "409105",
+          "old_stock": 1,
+          "new_stock": 0,
+          "drop_pct": 100.0
+        },
+        {
+          "channel": "Amazon",
+          "sku": "412824",
+          "webcd": "412824",
+          "old_stock": 2,
+          "new_stock": 0,
+          "drop_pct": 100.0
+        },
+        {
+          "channel": "Amazon",
+          "sku": "447132ｘ24",
+          "webcd": "447132",
+          "old_stock": 2,
+          "new_stock": 0,
+          "drop_pct": 100.0
+        },
+        {
+          "channel": "Amazon",
+          "sku": "501311x72",
+          "webcd": "501311",
+          "old_stock": 1,
+          "new_stock": 0,
+          "drop_pct": 100.0
+        },
+        {
+          "channel": "Amazon",
+          "sku": "501406x72",
+          "webcd": "501406",
+          "old_stock": 1,
+          "new_stock": 0,
+          "drop_pct": 100.0
+        },
+        {
+          "channel": "Amazon",
+          "sku": "501416x72",
+          "webcd": "501416",
+          "old_stock": 1,
+          "new_stock": 0,
+          "drop_pct": 100.0
+        },
+        {
+          "channel": "Amazon",
+          "sku": "508376",
+          "webcd": "508376",
+          "old_stock": 3,
+          "new_stock": 0,
+          "drop_pct": 100.0
+        },
+        {
+          "channel": "Amazon",
+          "sku": "517247x48",
+          "webcd": "517247",
+          "old_stock": 1,
+          "new_stock": 0,
+          "drop_pct": 100.0
+        },
+        {
+          "channel": "Amazon",
+          "sku": "541665x24",
+          "webcd": "541665",
+          "old_stock": 1,
+          "new_stock": 0,
+          "drop_pct": 100.0
+        },
+        {
+          "channel": "Mercari",
+          "sku": "509086",
+          "webcd": "509086",
+          "old_stock": 18,
+          "new_stock": 1,
+          "drop_pct": 94.4
+        },
+        {
+          "channel": "Mercari",
+          "sku": "509086x4",
+          "webcd": "509086",
+          "old_stock": 4,
+          "new_stock": 0,
+          "drop_pct": 100.0
+        },
+        {
+          "channel": "Mercari",
+          "sku": "310442x8",
+          "webcd": "310442",
+          "old_stock": 2,
+          "new_stock": 0,
+          "drop_pct": 100.0
+        },
+        {
+          "channel": "Mercari",
+          "sku": "310442x4",
+          "webcd": "310442",
+          "old_stock": 5,
+          "new_stock": 1,
+          "drop_pct": 80.0
+        },
+        {
+          "channel": "Mercari",
+          "sku": "321295",
+          "webcd": "321295",
+          "old_stock": 25,
+          "new_stock": 2,
+          "drop_pct": 92.0
+        },
+        {
+          "channel": "Mercari",
+          "sku": "327110x6",
+          "webcd": "327110",
+          "old_stock": 37,
+          "new_stock": 5,
+          "drop_pct": 86.5
+        },
+        {
+          "channel": "Mercari",
+          "sku": "245306x8",
+          "webcd": "245306",
+          "old_stock": 8,
+          "new_stock": 0,
+          "drop_pct": 100.0
+        },
+        {
+          "channel": "Mercari",
+          "sku": "515897x18",
+          "webcd": "515897",
+          "old_stock": 1,
+          "new_stock": 0,
+          "drop_pct": 100.0
+        },
+        {
+          "channel": "Mercari",
+          "sku": "515897x12",
+          "webcd": "515897",
+          "old_stock": 1,
+          "new_stock": 0,
+          "drop_pct": 100.0
+        },
+        {
+          "channel": "Mercari",
+          "sku": "515899x18",
+          "webcd": "515899",
+          "old_stock": 1,
+          "new_stock": 0,
+          "drop_pct": 100.0
+        },
+        {
+          "channel": "Mercari",
+          "sku": "515899x12",
+          "webcd": "515899",
+          "old_stock": 1,
+          "new_stock": 0,
+          "drop_pct": 100.0
+        },
+        {
+          "channel": "Mercari",
+          "sku": "515898x18",
+          "webcd": "515898",
+          "old_stock": 1,
+          "new_stock": 0,
+          "drop_pct": 100.0
+        },
+        {
+          "channel": "Mercari",
+          "sku": "515898x12",
+          "webcd": "515898",
+          "old_stock": 1,
+          "new_stock": 0,
+          "drop_pct": 100.0
+        },
+        {
+          "channel": "Mercari",
+          "sku": "515900x18",
+          "webcd": "515900",
+          "old_stock": 1,
+          "new_stock": 0,
+          "drop_pct": 100.0
+        },
+        {
+          "channel": "Mercari",
+          "sku": "515900x12",
+          "webcd": "515900",
+          "old_stock": 1,
+          "new_stock": 0,
+          "drop_pct": 100.0
+        },
+        {
+          "channel": "Mercari",
+          "sku": "515896x18",
+          "webcd": "515896",
+          "old_stock": 1,
+          "new_stock": 0,
+          "drop_pct": 100.0
+        },
+        {
+          "channel": "Mercari",
+          "sku": "515896x12",
+          "webcd": "515896",
+          "old_stock": 1,
+          "new_stock": 0,
+          "drop_pct": 100.0
+        },
+        {
+          "channel": "Mercari",
+          "sku": "533057x24",
+          "webcd": "533057",
+          "old_stock": 2,
+          "new_stock": 0,
+          "drop_pct": 100.0
+        },
+        {
+          "channel": "Mercari",
+          "sku": "533034x24",
+          "webcd": "533034",
+          "old_stock": 2,
+          "new_stock": 0,
+          "drop_pct": 100.0
+        },
+        {
+          "channel": "Mercari",
+          "sku": "533021x24",
+          "webcd": "533021",
+          "old_stock": 2,
+          "new_stock": 0,
+          "drop_pct": 100.0
+        },
+        {
+          "channel": "Mercari",
+          "sku": "323394",
+          "webcd": "323394",
+          "old_stock": 5,
+          "new_stock": 0,
+          "drop_pct": 100.0
+        },
+        {
+          "channel": "Mercari",
+          "sku": "502929x2",
+          "webcd": "502929",
+          "old_stock": 49,
+          "new_stock": 5,
+          "drop_pct": 89.8
+        },
+        {
+          "channel": "Mercari",
+          "sku": "497665x24",
+          "webcd": "497665",
+          "old_stock": 50,
+          "new_stock": 4,
+          "drop_pct": 92.0
+        },
+        {
+          "channel": "Mercari",
+          "sku": "499129x24",
+          "webcd": "499129",
+          "old_stock": 50,
+          "new_stock": 3,
+          "drop_pct": 94.0
+        },
+        {
+          "channel": "Mercari",
+          "sku": "499129x12",
+          "webcd": "499129",
+          "old_stock": 50,
+          "new_stock": 6,
+          "drop_pct": 88.0
+        },
+        {
+          "channel": "Mercari",
+          "sku": "497665x12",
+          "webcd": "497665",
+          "old_stock": 50,
+          "new_stock": 9,
+          "drop_pct": 82.0
+        },
+        {
+          "channel": "Mercari",
+          "sku": "497664x24",
+          "webcd": "497664",
+          "old_stock": 50,
+          "new_stock": 3,
+          "drop_pct": 94.0
+        },
+        {
+          "channel": "Mercari",
+          "sku": "497664x12",
+          "webcd": "497664",
+          "old_stock": 50,
+          "new_stock": 7,
+          "drop_pct": 86.0
+        },
+        {
+          "channel": "Mercari",
+          "sku": "497663x24",
+          "webcd": "497663",
+          "old_stock": 50,
+          "new_stock": 2,
+          "drop_pct": 96.0
+        },
+        {
+          "channel": "Mercari",
+          "sku": "497663x12",
+          "webcd": "497663",
+          "old_stock": 50,
+          "new_stock": 4,
+          "drop_pct": 92.0
+        },
+        {
+          "channel": "Mercari",
+          "sku": "477767x24",
+          "webcd": "477767",
+          "old_stock": 50,
+          "new_stock": 1,
+          "drop_pct": 98.0
+        },
+        {
+          "channel": "Mercari",
+          "sku": "477764x24",
+          "webcd": "477764",
+          "old_stock": 50,
+          "new_stock": 3,
+          "drop_pct": 94.0
+        },
+        {
+          "channel": "Mercari",
+          "sku": "477767x12",
+          "webcd": "477767",
+          "old_stock": 50,
+          "new_stock": 2,
+          "drop_pct": 96.0
+        },
+        {
+          "channel": "Mercari",
+          "sku": "477764x12",
+          "webcd": "477764",
+          "old_stock": 50,
+          "new_stock": 6,
+          "drop_pct": 88.0
+        },
+        {
+          "channel": "Mercari",
+          "sku": "477761x24",
+          "webcd": "477761",
+          "old_stock": 50,
+          "new_stock": 3,
+          "drop_pct": 94.0
+        },
+        {
+          "channel": "Mercari",
+          "sku": "477757x24",
+          "webcd": "477757",
+          "old_stock": 50,
+          "new_stock": 3,
+          "drop_pct": 94.0
+        },
+        {
+          "channel": "Mercari",
+          "sku": "477761x12",
+          "webcd": "477761",
+          "old_stock": 50,
+          "new_stock": 6,
+          "drop_pct": 88.0
+        },
+        {
+          "channel": "Mercari",
+          "sku": "477757x12",
+          "webcd": "477757",
+          "old_stock": 50,
+          "new_stock": 6,
+          "drop_pct": 88.0
+        },
+        {
+          "channel": "Mercari",
+          "sku": "236232x20",
+          "webcd": "236232",
+          "old_stock": 2,
+          "new_stock": 0,
+          "drop_pct": 100.0
+        },
+        {
+          "channel": "Mercari",
+          "sku": "236233x20",
+          "webcd": "236233",
+          "old_stock": 2,
+          "new_stock": 0,
+          "drop_pct": 100.0
+        },
+        {
+          "channel": "Mercari",
+          "sku": "458866x20",
+          "webcd": "458866",
+          "old_stock": 2,
+          "new_stock": 0,
+          "drop_pct": 100.0
+        },
+        {
+          "channel": "Mercari",
+          "sku": "458867x20",
+          "webcd": "458867",
+          "old_stock": 2,
+          "new_stock": 0,
+          "drop_pct": 100.0
+        },
+        {
+          "channel": "Mercari",
+          "sku": "236232x10",
+          "webcd": "236232",
+          "old_stock": 10,
+          "new_stock": 1,
+          "drop_pct": 90.0
+        },
+        {
+          "channel": "Mercari",
+          "sku": "236233x10",
+          "webcd": "236233",
+          "old_stock": 10,
+          "new_stock": 1,
+          "drop_pct": 90.0
+        },
+        {
+          "channel": "Mercari",
+          "sku": "269343x10",
+          "webcd": "269343",
+          "old_stock": 10,
+          "new_stock": 2,
+          "drop_pct": 80.0
+        },
+        {
+          "channel": "Mercari",
+          "sku": "269344x10",
+          "webcd": "269344",
+          "old_stock": 10,
+          "new_stock": 2,
+          "drop_pct": 80.0
+        },
+        {
+          "channel": "Mercari",
+          "sku": "298871x10",
+          "webcd": "298871",
+          "old_stock": 10,
+          "new_stock": 2,
+          "drop_pct": 80.0
+        },
+        {
+          "channel": "Mercari",
+          "sku": "298872x10",
+          "webcd": "298872",
+          "old_stock": 10,
+          "new_stock": 2,
+          "drop_pct": 80.0
+        },
+        {
+          "channel": "Mercari",
+          "sku": "458866x10",
+          "webcd": "458866",
+          "old_stock": 10,
+          "new_stock": 1,
+          "drop_pct": 90.0
+        },
+        {
+          "channel": "Mercari",
+          "sku": "458867x10",
+          "webcd": "458867",
+          "old_stock": 10,
+          "new_stock": 1,
+          "drop_pct": 90.0
+        },
+        {
+          "channel": "Mercari",
+          "sku": "458868x10",
+          "webcd": "458868",
+          "old_stock": 10,
+          "new_stock": 2,
+          "drop_pct": 80.0
+        },
+        {
+          "channel": "Mercari",
+          "sku": "458869x10",
+          "webcd": "458869",
+          "old_stock": 10,
+          "new_stock": 2,
+          "drop_pct": 80.0
+        },
+        {
+          "channel": "Mercari",
+          "sku": "299999x20",
+          "webcd": "299999",
+          "old_stock": 5,
+          "new_stock": 1,
+          "drop_pct": 80.0
+        },
+        {
+          "channel": "Mercari",
+          "sku": "427104x20",
+          "webcd": "427104",
+          "old_stock": 5,
+          "new_stock": 1,
+          "drop_pct": 80.0
+        },
+        {
+          "channel": "Mercari",
+          "sku": "509096x20",
+          "webcd": "509096",
+          "old_stock": 5,
+          "new_stock": 1,
+          "drop_pct": 80.0
+        },
+        {
+          "channel": "Mercari",
+          "sku": "502683",
+          "webcd": "502683",
+          "old_stock": 10,
+          "new_stock": 0,
+          "drop_pct": 100.0
+        },
+        {
+          "channel": "Mercari",
+          "sku": "502683x20",
+          "webcd": "502683",
+          "old_stock": 5,
+          "new_stock": 0,
+          "drop_pct": 100.0
+        },
+        {
+          "channel": "Mercari",
+          "sku": "502683x10",
+          "webcd": "502683",
+          "old_stock": 50,
+          "new_stock": 0,
+          "drop_pct": 100.0
+        },
+        {
+          "channel": "Mercari",
+          "sku": "351733",
+          "webcd": "351733",
+          "old_stock": 2,
+          "new_stock": 0,
+          "drop_pct": 100.0
+        },
+        {
+          "channel": "Mercari",
+          "sku": "314989",
+          "webcd": "314989",
+          "old_stock": 1,
+          "new_stock": 0,
+          "drop_pct": 100.0
+        }
+      ]
+    },
+    "precheck_report": "/mnt/data/ec_inventory_app_v04_build/ec_inventory_app_v03/test_output/EC在庫更新_20260821_070035/要確認SKU_20260821.csv",
+    "output_dir": "/mnt/data/ec_inventory_app_v04_build/ec_inventory_app_v03/test_output/EC在庫更新_20260821_070035"
+  }
+}

@@ -1,0 +1,1 @@
+﻿Ver0.5 起動時の app.py 132行目 SyntaxError を修正済みです。
