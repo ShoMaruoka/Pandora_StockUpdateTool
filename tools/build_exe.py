@@ -16,21 +16,23 @@ NAME = "nightly_amazon"
 HIDDEN = (
     "amazon_listings",
     "amazon_report",
+    "business_day",
     "item_master",
     "logiless_stock",
     "notify_chatwork",
     "quote_stock",
     "wholesale_stock",
     "pyodbc",
+    "jpholiday",
 )
-REQUIRED = ("PyInstaller", "openpyxl", "pyodbc")
+REQUIRED = ("PyInstaller", "openpyxl", "pyodbc", "jpholiday")
 
 
 def main() -> int:
     missing = [name for name in REQUIRED if importlib.util.find_spec(name) is None]
     if missing:
         print("足りないパッケージ: " + ", ".join(missing))
-        print("py -3 -m pip install pyinstaller openpyxl pyodbc")
+        print("py -3 -m pip install pyinstaller openpyxl pyodbc jpholiday")
         return 1
     tests = subprocess.run([sys.executable, "-m", "unittest", "discover", "-s", "tests"], cwd=ROOT)
     if tests.returncode != 0:

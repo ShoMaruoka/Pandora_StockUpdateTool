@@ -18,8 +18,12 @@ sys.path.insert(0, str(ROOT / "全モール在庫更新ツール（EC_Inventory_
 
 from amazon_patch import PatchRejected, ReadbackPending  # noqa: E402
 from amazon_report import load_counts, save_counts  # noqa: E402
+import business_day  # noqa: E402
 import nightly_amazon  # noqa: E402
 from nightly_amazon import run  # noqa: E402
+
+# setUp で差し替える前の、本物の判定。
+REAL_CLOSED_TODAY = getattr(nightly_amazon, "_closed_today", None)
 
 
 def listings() -> dict:
@@ -68,6 +72,10 @@ class NightlyAmazonTest(unittest.TestCase):
         patcher = mock.patch.object(nightly_amazon, "ROOT", Path(self._root.name))
         patcher.start()
         self.addCleanup(patcher.stop)
+        # 既存のテストは営業日として動かす。実際の日付と販売管理には依存させない。
+        closed = mock.patch.object(nightly_amazon, "_closed_today", return_value=None)
+        self.closed_today = closed.start()
+        self.addCleanup(closed.stop)
 
     def logs(self) -> list[Path]:
         return sorted((Path(self._root.name) / "output" / "logs").glob("nightly_*.log"))
@@ -691,6 +699,110 @@ class NightlyAmazonTest(unittest.TestCase):
             code = nightly_amazon.main(["--dry-run"])
         self.assertEqual(code, 0)
         self.assertIn("exit 0", self.logs()[0].read_text(encoding="utf-8"))
+
+    def test_closed_day_ends_without_calling_anything(self) -> None:
+        self.closed_today.return_value = "祝日 文化の日"
+        for args in (["--dry-run"], ["--sku", "307679"], []):
+            with self.subTest(args=args), mock.patch.object(nightly_amazon, "run") as fake_run, mock.patch.object(
+                nightly_amazon, "_notify"
+            ) as notify, mock.patch.object(nightly_amazon, "_fetch_wholesale") as wholesale, redirect_stdout(io.StringIO()) as stdout:
+                code = nightly_amazon.main(args)
+            self.assertEqual(code, 0)
+            fake_run.assert_not_called()
+            notify.assert_not_called()
+            wholesale.assert_not_called()
+            self.assertIn("skip 休業日（祝日 文化の日）", stdout.getvalue())
+
+    def test_closed_day_log_has_start_skip_and_exit_zero_and_no_other_files(self) -> None:
+        self.closed_today.return_value = "会社休業日"
+        with mock.patch.object(nightly_amazon, "run") as fake_run, redirect_stdout(io.StringIO()):
+            nightly_amazon.main(["--dry-run"])
+        fake_run.assert_not_called()
+        text = self.logs()[0].read_text(encoding="utf-8-sig")
+        self.assertIn("start", text)
+        self.assertIn("skip 休業日（会社休業日）", text)
+        self.assertIn("exit 0", text)
+        output = Path(self._root.name) / "output"
+        self.assertEqual([path.name for path in output.iterdir()], ["logs"])
+
+    def test_business_day_runs_as_before(self) -> None:
+        self.closed_today.return_value = None
+        with mock.patch.object(nightly_amazon, "run", return_value=0) as fake_run, redirect_stdout(io.StringIO()) as stdout:
+            code = nightly_amazon.main(["--dry-run"])
+        self.assertEqual(code, 0)
+        fake_run.assert_called_once()
+        self.assertNotIn("skip", stdout.getvalue())
+
+    def test_unreadable_company_calendar_fails_and_notifies_without_running(self) -> None:
+        self.closed_today.side_effect = SystemExit(business_day.UNREADABLE)
+        notices = []
+        with mock.patch.object(nightly_amazon, "run") as fake_run, mock.patch.object(
+            nightly_amazon, "_notify", side_effect=notices.append
+        ), redirect_stdout(io.StringIO()):
+            code = nightly_amazon.main([])
+        self.assertEqual(code, 1)
+        fake_run.assert_not_called()
+        self.assertEqual(len(notices), 1)
+        self.assertIn(business_day.UNREADABLE, notices[0]["message"])
+        self.assertIn("送った件数 0", notices[0]["message"])
+        self.assertIn("処理時間", notices[0]["message"])
+        self.assertIsNone(notices[0]["csv"])
+
+    def test_unreadable_company_calendar_in_dry_run_does_not_notify(self) -> None:
+        self.closed_today.side_effect = SystemExit(business_day.UNREADABLE)
+        with mock.patch.object(nightly_amazon, "run") as fake_run, mock.patch.object(
+            nightly_amazon, "_notify"
+        ) as notify, redirect_stdout(io.StringIO()) as stdout:
+            code = nightly_amazon.main(["--dry-run"])
+        self.assertEqual(code, 1)
+        fake_run.assert_not_called()
+        notify.assert_not_called()
+        self.assertIn(business_day.UNREADABLE, stdout.getvalue())
+        self.assertIn("exit 1", self.logs()[0].read_text(encoding="utf-8"))
+
+    def test_force_skips_the_check_and_runs(self) -> None:
+        self.closed_today.side_effect = AssertionError("判定してはいけない")
+        with mock.patch.object(nightly_amazon, "run", return_value=0) as fake_run, mock.patch.object(
+            nightly_amazon, "_held_enabled", return_value=False
+        ), redirect_stdout(io.StringIO()) as stdout:
+            code = nightly_amazon.main(["--force"])
+        self.assertEqual(code, 0)
+        fake_run.assert_called_once()
+        self.assertFalse(fake_run.call_args.kwargs["dry_run"])
+        self.assertIsNone(fake_run.call_args.kwargs["sku"])
+        self.assertIn("force 営業日の判定をしません", stdout.getvalue())
+
+    def test_force_works_together_with_other_arguments(self) -> None:
+        self.closed_today.side_effect = AssertionError("判定してはいけない")
+        with mock.patch.object(nightly_amazon, "run", return_value=0) as fake_run, redirect_stdout(io.StringIO()):
+            nightly_amazon.main(["--force", "--dry-run"])
+        self.assertTrue(fake_run.call_args.kwargs["dry_run"])
+
+    def test_closed_today_does_not_read_the_database_on_weekends_and_holidays(self) -> None:
+        from datetime import date
+
+        real = REAL_CLOSED_TODAY
+        broken = mock.Mock(side_effect=SystemExit(business_day.UNREADABLE))
+        with mock.patch.object(nightly_amazon, "is_company_closed", broken):
+            self.assertEqual(real(date(2026, 10, 24)), "土曜")
+            self.assertEqual(real(date(2026, 11, 3)), "祝日 文化の日")
+        broken.assert_not_called()
+
+    def test_closed_today_fails_on_a_weekday_when_the_database_is_unreadable(self) -> None:
+        from datetime import date
+
+        broken = mock.Mock(side_effect=SystemExit(business_day.UNREADABLE))
+        with mock.patch.object(nightly_amazon, "is_company_closed", broken):
+            with self.assertRaises(SystemExit):
+                REAL_CLOSED_TODAY(date(2026, 10, 23))
+
+    def test_closed_today_uses_the_company_calendar(self) -> None:
+        from datetime import date
+
+        with mock.patch.object(nightly_amazon, "is_company_closed", return_value=True):
+            self.assertEqual(REAL_CLOSED_TODAY(date(2026, 8, 13)), "会社休業日")
+        with mock.patch.object(nightly_amazon, "is_company_closed", return_value=False):
+            self.assertIsNone(REAL_CLOSED_TODAY(date(2026, 12, 25)))
 
     def test_module_does_not_call_other_malls(self) -> None:
         source = (ROOT / "tools" / "nightly_amazon.py").read_text(encoding="utf-8").lower()

@@ -7,7 +7,7 @@ import sys
 import time
 import traceback
 from collections import Counter
-from datetime import datetime
+from datetime import date, datetime
 from pathlib import Path
 
 # スクリプトとして動かすときの読み込み先。exe では中に入っているので使わない。
@@ -19,6 +19,7 @@ from adjusted_stock import adjusted_stock  # noqa: E402
 from amazon_gate import AmazonRun, decide  # noqa: E402
 from amazon_patch import PatchRejected, ReadbackPending, one_update  # noqa: E402
 from amazon_report import choose_listings, load_counts, next_counts, save_counts  # noqa: E402
+from business_day import closed_reason, is_company_closed  # noqa: E402
 from engine import build_master, calc, parse_sku  # noqa: E402
 from item_master import webcd_key  # noqa: E402
 from notify_chatwork import REJECTED_COLUMNS, UPDATED_COLUMNS, build_notice, build_notices, format_elapsed, with_elapsed, zeroed_rows  # noqa: E402
@@ -343,6 +344,14 @@ def _main(args: list[str]) -> int:
     # 引数なしは全件更新。--dry-run は送らない。--sku はその1件だけ送って読み戻す。
     dry_run = "--dry-run" in args
     try:
+        # 休業日は何も取得せず、送らず、通知もせずに終わる。--force は判定しない。
+        if "--force" in args:
+            print("force 営業日の判定をしません")
+        else:
+            reason = _closed_today()
+            if reason:
+                print(f"skip 休業日（{reason}）")
+                return 0
         return run(
             ROOT / "output",
             dry_run=dry_run,
@@ -382,6 +391,11 @@ def _main(args: list[str]) -> int:
             except (Exception, SystemExit):
                 print("通知に失敗しました。在庫の再送はしません。")
         return EXIT["failed"]
+
+
+def _closed_today(day: date | None = None) -> str | None:
+    """今日が休業日なら理由。T007CM休業日を読めないときは SystemExit（営業日とはみなさない）。"""
+    return closed_reason(day or date.today(), is_company_closed)
 
 
 def _elapsed_text(elapsed) -> str | None:
