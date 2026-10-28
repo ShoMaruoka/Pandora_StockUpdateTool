@@ -169,18 +169,27 @@ def patch_quantity(sku: str, quantity: int, readback: bool = True, product_type:
     sku_path = quote(str(sku), safe="")
     query = urlencode({"marketplaceIds": MARKETPLACE_ID, "includedData": "summaries,fulfillmentAvailability"})
     path = f"/listings/2021-08-01/items/{seller}/{sku_path}?" + query
-    if not product_type:
-        product_type = _product_type(_sp_get(store, path))
-    if not product_type:
-        raise PatchRejected(sku, "商品タイプが取れないため、更新を送りません。")
-    patch_path = f"/listings/2021-08-01/items/{seller}/{sku_path}?" + urlencode({"marketplaceIds": MARKETPLACE_ID})
-    result = _send_patch(store, patch_path, sku, quantity, product_type)
-    if result.get("status") != "ACCEPTED" and _invalid_product_type(result) and product_type != GENERIC_PRODUCT_TYPE:
-        # 古い商品タイプ名（例: FOOD_AND_BEVERAGE）は今のマーケットプレイスで受け付けられない。
-        # 在庫数だけの更新は、汎用の PRODUCT で受け付けられる。
-        print(f"patch retry {sku} product type {product_type} -> {GENERIC_PRODUCT_TYPE}")
-        product_type = GENERIC_PRODUCT_TYPE
+    try:
+        if not product_type:
+            product_type = _product_type(_sp_get(store, path))
+        if not product_type:
+            raise PatchRejected(sku, "商品タイプが取れないため、更新を送りません。")
+        patch_path = f"/listings/2021-08-01/items/{seller}/{sku_path}?" + urlencode({"marketplaceIds": MARKETPLACE_ID})
         result = _send_patch(store, patch_path, sku, quantity, product_type)
+        if result.get("status") != "ACCEPTED" and _invalid_product_type(result) and product_type != GENERIC_PRODUCT_TYPE:
+            # 古い商品タイプ名（例: FOOD_AND_BEVERAGE）は今のマーケットプレイスで受け付けられない。
+            # 在庫数だけの更新は、汎用の PRODUCT で受け付けられる。
+            print(f"patch retry {sku} product type {product_type} -> {GENERIC_PRODUCT_TYPE}")
+            product_type = GENERIC_PRODUCT_TYPE
+            result = _send_patch(store, patch_path, sku, quantity, product_type)
+    except PatchRejected:
+        raise
+    except SystemExit as exc:
+        # 出品レポートにだけ残っている削除済みの SKU は 404 になる（2026-10-28 324566）。
+        # その SKU だけを拒否として扱い、残りの SKU は送り続ける。
+        if isinstance(exc.code, str) and "(404)" in exc.code:
+            raise PatchRejected(sku, "Amazon に出品がありません (404)。最近削除された出品の可能性があります。") from exc
+        raise
     if result.get("status") != "ACCEPTED":
         issues = "; ".join(
             f"{issue.get('code')} {_redact(str(issue.get('message') or ''), store)}" for issue in result.get("issues") or []

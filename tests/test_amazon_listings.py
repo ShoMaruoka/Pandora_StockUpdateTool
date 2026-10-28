@@ -236,6 +236,42 @@ class AmazonListingsTest(unittest.TestCase):
         self.assertIn("90000900", caught.exception.reason)
         self.assertIn("価格が不正です", caught.exception.reason)
 
+    def test_deleted_listing_on_read_is_a_sku_level_rejection(self) -> None:
+        # レポートにだけ残っていた削除済みの SKU（2026-10-28 324566）。残りの SKU は送り続ける。
+        from amazon_patch import PatchRejected
+
+        calls = self.patch_mocks()
+        gone = SystemExit('Amazon がエラーを返しました (404): {"errors": [{"code": "NOT_FOUND"}]}')
+        with mock.patch.object(amazon_listings, "_sp_get", mock.Mock(side_effect=gone)), mock.patch(
+            "builtins.print"
+        ), self.assertRaises(PatchRejected) as caught:
+            amazon_listings.patch_quantity("324566", 3, readback=False)
+        self.assertEqual(caught.exception.sku, "324566")
+        self.assertIn("404", caught.exception.reason)
+        self.assertEqual(calls["patch"], [])
+
+    def test_deleted_listing_on_patch_is_a_sku_level_rejection(self) -> None:
+        from amazon_patch import PatchRejected
+
+        self.patch_mocks()
+        gone = SystemExit('Amazon がエラーを返しました (404): {"errors": [{"code": "NOT_FOUND"}]}')
+        with mock.patch.object(amazon_listings, "_sp_json", mock.Mock(side_effect=gone)), mock.patch(
+            "builtins.print"
+        ), self.assertRaises(PatchRejected) as caught:
+            amazon_listings.patch_quantity("324566", 3, readback=False, product_type="KNOWN")
+        self.assertEqual(caught.exception.sku, "324566")
+
+    def test_other_http_errors_on_patch_still_stop_the_run(self) -> None:
+        from amazon_patch import PatchRejected
+
+        self.patch_mocks()
+        down = SystemExit("Amazon がエラーを返しました (500): {}")
+        with mock.patch.object(amazon_listings, "_sp_json", mock.Mock(side_effect=down)), mock.patch(
+            "builtins.print"
+        ), self.assertRaises(SystemExit) as caught:
+            amazon_listings.patch_quantity("307679", 5, readback=False, product_type="KNOWN")
+        self.assertNotIsInstance(caught.exception, PatchRejected)
+
     def test_http_errors_are_not_sku_level_rejections(self) -> None:
         from amazon_patch import PatchRejected
 
