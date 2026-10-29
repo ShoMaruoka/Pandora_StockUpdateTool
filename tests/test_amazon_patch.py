@@ -53,6 +53,20 @@ class AmazonPatchTest(unittest.TestCase):
         )
         self.assertNotIn("AMAZON", str(body))
 
+    def test_patch_carries_lead_time_when_given(self) -> None:
+        body = fulfillment_patch(0, "PRODUCT", "A1VC38T7YXB528", lead_time=3)
+        self.assertEqual(
+            body["patches"][0]["value"],
+            [
+                {
+                    "fulfillment_channel_code": "DEFAULT",
+                    "quantity": 0,
+                    "marketplace_id": "A1VC38T7YXB528",
+                    "lead_time_to_ship_max_days": 3,
+                }
+            ],
+        )
+
     def test_named_sku_sends_one_request(self) -> None:
         sent = []
 

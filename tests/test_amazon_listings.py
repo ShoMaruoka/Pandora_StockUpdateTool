@@ -156,16 +156,24 @@ class AmazonListingsTest(unittest.TestCase):
         self.assertEqual(result["listings"][0]["product_type"], "BATH_SAFETY_SEATING")
         self.assertNotIn("product_type", result["listings"][1])
 
-    def patch_mocks(self, accepted=True, responses=None):
-        calls = {"get": [], "patch": []}
+    def patch_mocks(self, accepted=True, responses=None, lead_time=3):
+        calls = {"get": [], "patch": [], "values": []}
         queue = list(responses or [])
+        merchant = {"fulfillment_channel_code": "DEFAULT", "quantity": 5}
+        if lead_time is not None:
+            merchant["lead_time_to_ship_max_days"] = lead_time
 
         def fake_get(_store, path):
             calls["get"].append(path)
-            return {"summaries": [{"productType": "READ_TYPE"}], "fulfillmentAvailability": [{"fulfillmentChannelCode": "DEFAULT", "quantity": 5}]}
+            return {
+                "summaries": [{"productType": "READ_TYPE"}],
+                "attributes": {"fulfillment_availability": [merchant]},
+                "fulfillmentAvailability": [{"fulfillmentChannelCode": "DEFAULT", "quantity": 5}],
+            }
 
         def fake_json(_store, method, path, body):
             calls["patch"].append((method, body["productType"], body["patches"][0]["value"][0]["quantity"]))
+            calls["values"].append(body["patches"][0]["value"][0])
             if queue:
                 return queue.pop(0)
             return {"status": "ACCEPTED" if accepted else "INVALID", "issues": []}
@@ -187,8 +195,42 @@ class AmazonListingsTest(unittest.TestCase):
         calls = self.patch_mocks()
         with mock.patch("builtins.print"):
             amazon_listings.patch_quantity("307679", 5, readback=False, product_type="KNOWN")
-        self.assertEqual(calls["get"], [])
+        # 処理時間を読むための1回だけ。反映の読み戻しはしない。
+        self.assertEqual(len(calls["get"]), 1)
+        self.assertIn("attributes", calls["get"][0])
         self.assertEqual(calls["patch"], [("PATCH", "KNOWN", 5)])
+
+    def test_current_lead_time_is_sent_again(self) -> None:
+        # 数量だけを送ると処理時間が空白になる（2026-10-29）。
+        calls = self.patch_mocks(lead_time=4)
+        with mock.patch("builtins.print"):
+            amazon_listings.patch_quantity("307679", 0, readback=False, product_type="KNOWN")
+        self.assertEqual(calls["values"][0]["lead_time_to_ship_max_days"], 4)
+        self.assertEqual(calls["values"][0]["quantity"], 0)
+
+    def test_lead_time_is_kept_on_generic_product_retry(self) -> None:
+        calls = self.patch_mocks(responses=[self.invalid_type(), {"status": "ACCEPTED", "issues": []}], lead_time=2)
+        with mock.patch("builtins.print"):
+            amazon_listings.patch_quantity("534174x24", 2, readback=False, product_type="FOOD_AND_BEVERAGE")
+        self.assertEqual([value["lead_time_to_ship_max_days"] for value in calls["values"]], [2, 2])
+
+    def test_missing_lead_time_sends_quantity_only(self) -> None:
+        calls = self.patch_mocks(lead_time=None)
+        with mock.patch("builtins.print"):
+            amazon_listings.patch_quantity("307679", 5, readback=False, product_type="KNOWN")
+        self.assertNotIn("lead_time_to_ship_max_days", calls["values"][0])
+
+    def test_lead_time_of_amazon_channel_is_ignored(self) -> None:
+        item = {
+            "attributes": {
+                "fulfillment_availability": [
+                    {"fulfillment_channel_code": "AMAZON_JP", "lead_time_to_ship_max_days": 9},
+                    {"fulfillment_channel_code": "DEFAULT", "lead_time_to_ship_max_days": "3"},
+                ]
+            }
+        }
+        self.assertEqual(amazon_listings._lead_time(item), 3)
+        self.assertIsNone(amazon_listings._lead_time({}))
 
     def test_quick_patch_reads_product_type_only_when_missing(self) -> None:
         calls = self.patch_mocks()

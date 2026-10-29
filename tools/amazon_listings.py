@@ -151,7 +151,8 @@ def patch_quantity(sku: str, quantity: int, readback: bool = True, product_type:
     """指定SKUの出品者出荷数量を絶対値で更新する。readback のときは読み戻す。
 
     全件更新では readback=False にし、ACCEPTED だけを確かめる。認証は最初の1回だけ行う。
-    product_type が分かっているときは、その SKU を読み直さない。
+    送る前に必ずその SKU を読み、今の処理時間（リードタイム）を同じ値で送り直す。
+    product_type が分かっているときは、読んだ値よりそちらを使う。
     """
     from urllib.parse import quote
 
@@ -169,19 +170,24 @@ def patch_quantity(sku: str, quantity: int, readback: bool = True, product_type:
     sku_path = quote(str(sku), safe="")
     query = urlencode({"marketplaceIds": MARKETPLACE_ID, "includedData": "summaries,fulfillmentAvailability"})
     path = f"/listings/2021-08-01/items/{seller}/{sku_path}?" + query
+    read_query = urlencode({"marketplaceIds": MARKETPLACE_ID, "includedData": "summaries,attributes,fulfillmentAvailability"})
+    read_path = f"/listings/2021-08-01/items/{seller}/{sku_path}?" + read_query
     try:
+        # 数量だけを送ると処理時間が空白になる（2026-10-29）。送る前に今の値を読む。
+        item = _sp_get(store, read_path)
+        lead_time = _lead_time(item)
         if not product_type:
-            product_type = _product_type(_sp_get(store, path))
+            product_type = _product_type(item)
         if not product_type:
             raise PatchRejected(sku, "商品タイプが取れないため、更新を送りません。")
         patch_path = f"/listings/2021-08-01/items/{seller}/{sku_path}?" + urlencode({"marketplaceIds": MARKETPLACE_ID})
-        result = _send_patch(store, patch_path, sku, quantity, product_type)
+        result = _send_patch(store, patch_path, sku, quantity, product_type, lead_time)
         if result.get("status") != "ACCEPTED" and _invalid_product_type(result) and product_type != GENERIC_PRODUCT_TYPE:
             # 古い商品タイプ名（例: FOOD_AND_BEVERAGE）は今のマーケットプレイスで受け付けられない。
             # 在庫数だけの更新は、汎用の PRODUCT で受け付けられる。
             print(f"patch retry {sku} product type {product_type} -> {GENERIC_PRODUCT_TYPE}")
             product_type = GENERIC_PRODUCT_TYPE
-            result = _send_patch(store, patch_path, sku, quantity, product_type)
+            result = _send_patch(store, patch_path, sku, quantity, product_type, lead_time)
     except PatchRejected:
         raise
     except SystemExit as exc:
@@ -210,11 +216,11 @@ GENERIC_PRODUCT_TYPE = "PRODUCT"
 INVALID_PRODUCT_TYPE = "4000003"
 
 
-def _send_patch(store: dict, path: str, sku: str, quantity: int, product_type: str) -> dict:
+def _send_patch(store: dict, path: str, sku: str, quantity: int, product_type: str, lead_time: int | None = None) -> dict:
     from amazon_patch import fulfillment_patch
 
-    result = _sp_json(store, "PATCH", path, fulfillment_patch(quantity, product_type, MARKETPLACE_ID))
-    print(f"patch {sku} status {result.get('status')} issues {len(result.get('issues') or [])}")
+    result = _sp_json(store, "PATCH", path, fulfillment_patch(quantity, product_type, MARKETPLACE_ID, lead_time))
+    print(f"patch {sku} lead time {lead_time} status {result.get('status')} issues {len(result.get('issues') or [])}")
     for issue in result.get("issues") or []:
         print(f"patch issue {sku} {issue.get('code')} {_redact(str(issue.get('message') or ''), store)}")
     return result
@@ -254,6 +260,18 @@ def _product_type(item: dict) -> str:
         if product_type:
             return str(product_type)
     return ""
+
+
+def _lead_time(item: dict) -> int | None:
+    """出品者出荷の処理時間（日数）。設定が無いときは None。"""
+    for row in (item.get("attributes") or {}).get("fulfillment_availability") or []:
+        if row.get("fulfillment_channel_code") != "DEFAULT":
+            continue
+        try:
+            return int(row["lead_time_to_ship_max_days"])
+        except (KeyError, TypeError, ValueError):
+            return None
+    return None
 
 
 def _merchant_quantity(item: dict) -> int | None:

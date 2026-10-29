@@ -33,20 +33,22 @@ def one_update(decision: AmazonRun, sku: str) -> dict | None:
     return None
 
 
-def fulfillment_patch(quantity: int, product_type: str, marketplace_id: str) -> dict:
+def fulfillment_patch(quantity: int, product_type: str, marketplace_id: str, lead_time: int | None = None) -> dict:
+    """replace は項目を丸ごと置き換える。処理時間を入れないと空白になるので、今の値を入れ直す。"""
+    value = {
+        "fulfillment_channel_code": "DEFAULT",
+        "quantity": int(quantity),
+        "marketplace_id": marketplace_id,
+    }
+    if lead_time is not None:
+        value["lead_time_to_ship_max_days"] = int(lead_time)
     return {
         "productType": product_type,
         "patches": [
             {
                 "op": "replace",
                 "path": "/attributes/fulfillment_availability",
-                "value": [
-                    {
-                        "fulfillment_channel_code": "DEFAULT",
-                        "quantity": int(quantity),
-                        "marketplace_id": marketplace_id,
-                    }
-                ],
+                "value": [value],
             }
         ],
     }
